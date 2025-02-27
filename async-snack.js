@@ -5,27 +5,36 @@ async function getChefBirthday(id) {
         recipe = await recipeResponse.json()
     }
     catch (error) {
-        throw new Error(`Ricetta con id: ${id} non trovata`)
+        console.error(error)
+        throw new Error(`Fetch della Ricetta con id: ${id} non riuscito`)
     }
 
     if (recipe.message) {
         throw new Error(recipe.message)
     }
-    let userId = recipe.userId
-    let birthday
+    let chef
     try {
-        const userResponse = await fetch(`https://dummyjson.com/users/${userId}`)
-        recipe.userId = await userResponse.json()
+        const chefResponse = await fetch(`https://dummyjson.com/users/${recipe.userId}`)
+        chef = await chefResponse.json()
         birthday = recipe.userId.birthDate
     }
     catch (error) {
-        throw new Error(`Utente con id: ${userId} non trovato`)
+        console.error(error)
+        throw new Error(`Fecth dello Chef con id: ${id} non riuscito`)
     }
-
-    birthday = dayjs(recipe.userId.birthDate).format('DD/MM/YYYY')
-    return birthday;
+    if (chef.message) {
+        throw new Error(chef.message)
+    }
+    const formattedDate = dayjs(chef.birthDate).format('DD/MM/YYYY')
+    return formattedDate
 }
 
-getChefBirthday(2)
-    .then(birthday => console.log("Data di nascita dello chef:", birthday))
-    .catch(error => console.error("Errore:", error.message));
+(async () => {
+    try {
+        const birthday = await getChefBirthday(1)
+        console.log("Data di nascita dello chef:", birthday)
+    }
+    catch (error) {
+        console.error("Errore:", error.message)
+    }
+})()
